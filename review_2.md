@@ -8,11 +8,11 @@ Thanks for your valuable suggestions. In the new version, we add multiple method
 
 *Baselines:* We select the latest multi-step decision-making fully supervised method ACT [1] from the robotics learning area, which requires us to build an expert dataset for it via ppo in advance; and two recent SOTA methods in the Delayed MDP domain, i.e. DCAC [2] and State Augmentation (SA) [3] (Relax the Intermitted setting restrictions, allow such methods to additionally use dense rewards and delay priors at each step, and set the delay coefficient to the interaction interval). For a more comprehensive analysis, a recent model-based approach,i.e. delayed Dreamer[4], to overcome state delay is also chosen. 
 
-*Benchmarks:* For simulation environments, we further select four more challenging DeepMind Control (DMC) tasks focused on bionic robot locomotion: Dog Run, Dog Trot, Dog Stand and Humanoid Walk. DMC tasks demand coordinated movement from multi-joint bionic robots. Besides, two robotic arm control tasks in MetaWorld: Sweep Into and Coffee Push are used. For the real-world task, we condense the target arrangement (reducing the operational space to 85% of the original size), that is, the manipulator is required to work more smoothly and stably. The invalid jitter is more likely to knock over the target to be operated, resulting in task failure.
+*Benchmarks:* For simulation environments, we further select four more challenging DeepMind Control (DMC) tasks focused on bionic robot locomotion: Dog Run, Dog Trot, Dog Stand and Humanoid Walk. DMC tasks demand coordinated movement from multi-joint bionic robots. Besides, two robotic arm control tasks in MetaWorld: Sweep Into and Coffee Push are used. For the real-world task, we condense the target arrangement (reducing the operational space to 85% of the original size), that is, the manipulator is required to work more smoothly and stably. The invalid jitter is more likely to knock over the target to be operated, resulting in task failure. The environmental parameters and network hyperparameters remained consistent with the main experiment.
 
 *Metrics:* We evaluate methods in terms of performance and Smoothness (whether the motion is coherent and stable, invalid jitter and stagnation will reduce the score, please refer to Sec.4.2 for detail).
 
-Table 1. Performance score (smoothness (%)) (Average of 4 runs):
+Table 1a. Performance score of random Intermitted MDP setting (smoothness (%)) (Average of 4 runs):
 | Method      |Dog Run|Dog Trot| Dog Stand| Humanoid Walk|Sweep Into|Coffee Push|
 | :-----------: | :-----------: | :------------: | :-----------: | :-----------: | :-----------: | :-----------: |
 | **Ours**|$124.61\pm 44.92 (75)$|$574.12\pm 28.76 (88)$|$614.03\pm 17.42 (73)$|$105.47\pm 35.83 (82)$|$0.51\pm 0.13 (68)$|$0.38\pm 0.06(63)$|
@@ -20,6 +20,15 @@ Table 1. Performance score (smoothness (%)) (Average of 4 runs):
 | DCAC|$96.87\pm 28.44 (53)$|$426.93\pm 50.48 (72)$|$562.64\pm 22.73 (64)$|$105.32\pm 29.16 (49)$|$0.44\pm 0.27 (41)$|$0.19\pm 0.13 (48)$|
 | SA |$92.74\pm 51.06 (37)$|$385.67\pm 52.49 (39)$|$503.94\pm 14.86 (27)$|$75.66\pm 31.42 (45)$|$0.52\pm 0.21 (37)$|$0.34\pm 0.09 (39)$|
 | delayed Dreamer |$95.31\pm 26.74 (46)$|$428.39\pm 46.23 (46)$|$526.07\pm 21.84 (25)$|$89.25\pm 27.41 (41)$|$0.56\pm 0.17 (32)$|$0.39\pm 0.04 (37)$|
+
+Table 1b. Performance score of fixed Intermitted MDP setting (smoothness (%)) (Average of 4 runs):
+| Method      |Dog Run|Dog Trot| Dog Stand| Humanoid Walk|Sweep Into|Coffee Push|
+| :-----------: | :-----------: | :------------: | :-----------: | :-----------: | :-----------: | :-----------: |
+| **Ours**|$162.52\pm 64.43 (82)$|$593.73\pm 23.13 (85)$|$622.68\pm 26.07 (79)$|$121.32\pm 52.16 (84)$|$0.64\pm 0.07 (73)$|$0.42\pm 0.11 (72)$|
+| ACT|$127.23\pm 29.33 (76)$|$493.56\pm 48.27 (87)$|$627.31\pm 14.83 (76)$|$103.21\pm 19.35 (78)$|$0.51\pm 0.09 (69)$|$0.34\pm 0.06 (64)$|
+| DCAC|$94.42\pm 19.24 (58)$|$451.92\pm 27.06 (79)$|$568.07\pm 38.26 (74)$|$113.73\pm 22.24 (54)$|$0.54\pm 0.05 (48)$|$0.28\pm 0.14 (52)$|
+| SA |$92.31\pm 26.36 (34)$|$405.78\pm 74.19 (43)$|$562.84\pm 34.69 (31)$|$83.73\pm 28.41 (55)$|$0.47\pm 0.13 (42)$|$0.29\pm 0.16 (44)$|
+| delayed Dreamer |$103.71\pm 73.49 (51)$|$485.93\pm 95.27 (56)$|$541.58\pm 39.46 (36)$|$94.61\pm 22.31 (52)$|$0.66\pm 0.13 (46)$|$0.43\pm 0.145 (48)$|
 
 Experimental results show that our method performs better than other methods in almost all intermitted MDP control tasks while ensuring smooth and coherent motion of the agent. The effect of the supervised learning method ACT outperforms the delayed MDP methods, and the delayed MDP method performs well in the robotic arm scene but cannot maintain motion smoothness and time efficiency.
 
