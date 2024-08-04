@@ -3,80 +3,75 @@ We are deeply grateful for your recognition of our paper's motivation, performan
 If you think the following response addresses your concerns, we would appreciate it if you could kindly consider raising the score.
 ### Questions
 **Q1: It seems relevant to "Learning Fine-Grained Bimanual Manipulation with Low-Cost Hardware" (https://arxiv.org/pdf/2304.13705). How do you compare with MARS and this work?.**
-感谢您的论文分享！您提供的这篇工作进一步激发了我们对我们工作的完善。并会在新版本中的附录部分单独开辟“未来展望”章节来进行详细讨论。
 
-两个工作的区别 (我们的工作简称MARS, 您提供的工作简称ACT)：
-- *Problem focus* ACT主要关注机器人领域非常新颖且重要的问题：即如何为低成本Can learning enable low-cost and imprecise hardware to perform these fine manipulation tasks，而我们主要想构造一个插件话的模块提升强化学习算法在多步决策能力。
-- *Method* ACT和MARS都使用了CVAE的架构，但ACT（多步决策模型）主要使用C-VAE依靠高质量的专家熟悉通过模仿学习来离线学习有效的机械臂策略。而MARS（多步动作空间构造模型）主要通过C-VAE来根据低质量的随机状态转移数据构造无策略语义的动作空间，来辅助强化学习策略的训练。信任强化学习策略不涉及决策。高质量数据无法更好的获得。
-- *Technical* ACT创造性地根据action chunking 来 To combat the compounding errors of imitation learning in a way that is compatible with pixel-to-action policies。我们则通过引入asc和状态残差来辅助动作空间构建。
-但是,ACT篇工作对我们非常有启发：
-- 我们发现ACT是一个可靠且有价值的基线，并将其加入到了新版本的实验中。
-  - 我们根据文章开源的代码迁移到我们的设定上并在四个mujoco场景（我们将chunking number设为我们设定下的最大间隔，并将tempora ensemble设置为4文章中推荐的设定，并按照论文中的建议使用L1 loss来训练), 进行对比:
+Thanks for sharing this related research, the paper you provided further motivates us to improve our work. And in the new submission, we discussed this question in detail.
+
+The difference between the two works (ours is referred to as MARS, and related work is referred to as ACT) :
+- *Focus:* ACT addresses cutting-edge challenges in robotics: Can learning enable low-cost and imprecise hardware to perform these fine manipulation tasks? However, our primary objective is to develop a plug-in module that enhances the RL algorithm's proficiency in Intermitted MDP tasks.
+- *Training style:* ACT is an end-to-end supervised training method, and MARS is an unsupervised training method. 
+- *Form of application:* ACT, *a multi-step decision model*, primarily leverages the generative capability of C-VAE and depends on high-quality expert data to enhance the model's multi-step decision-making proficiency through imitation learning. MARS, *a multi-step action space construction model*, primarily utilizes the latent space construction capability of C-VAE to build the action space using low-quality random transition data. Subsequently, it aids in the training of RL-style training. Therefore, it is more suitable for scenarios where reinforcement learning excels.
+- *Technic:* ACT creatively introduces action chunking and temporal ensemble to address the compounding errors associated with imitation learning in a manner that aligns with pixel-to-action policies. MARS, on the other hand, assists in action space construction by introducing action transition scale and state residual guidance.
+
+ACT inspired us in two points:
+- We found ACT to be a dependable and valuable baseline, and we included it in the main experiments of the new submission.
+  - Based on the code provided in the paper, we migrated it to our setup. Initially, we utilized PPO to gather expert data for fully supervised training. We set the chunking number to the maximum interval for our task and configured the Temporal Ensemble to the recommended value in the paper,i.e. 4. Following the paper's suggestions, we trained using L1 loss.
+  - Benchmarks: Consistent with the Mujoco tasks in the original version.
+  
+  Table 1. Performance score of random Intermitted MDP setting (Average of 4 runs):
+  | Method  |Ant-v2|Walker2d-v2| HalfCHeetah-v2| Hopper-v2|
+  | :-----------: | :-----------: | :------------: | :-----------: | :-----------: | 
+  | **Ours**|$4354.61\pm 158.44$|$5436.42\pm 217.83$|$6175.63\pm 273.95$|$2613.58\pm 177.96$|
+  | ACT|$3279.82\pm 127.83$|$4892.18\pm 383.07$|$5811.51\pm 108.33$|$2684 .31\pm 238.27$|
+  | frameskip TD3|$492.53\pm 31.95$|$2584.18\pm 106.24$|$3281.45\pm 139.42$|$381.74\pm 53.67$|
+  | Multi-step TD3|$408.25\pm 31.76$|$529.26\pm 68.21$|$112.73\pm 17.82$|$1173.93\pm 78.28$|
+
+  - We find that ACT performs better than the original baselines we compare, but underperforms our method on most tasks.
+- ACT inspired us to employ a transformer architecture (similar to a BERT-like training style) instead of an MLP to construct the C-VAE. This transition is expected to enhance the representation capabilities of MARS in future work.
+  - We conducted a set of experiments on the Ant-v2, and we observed that the transformer-based MARS shows promise in enhancing RL algorithms and shows a more significant increase in representation ability when the interval time step $c$ becomes longer.
     
-  Table 1. Scores (Average of 5 runs, ‘*’ represents a newly added method):
-  | Method      | Ninja | Chaser | Heist |Leaper | Miner | Dodgeball|
-  | :-----------: | :-----------: | :------------: | :-----------: |:-----------: | :------------: | :-----------: |
-  | **Ours** |$6.18\pm 0.11$|$3.27\pm 0.08$|$5.65 \pm 0.53$|$5.21 \pm 1.03$|$11.47 \pm 2.97$|$4.80 \pm 0.41$|
-  | ExpGen-IDAAC*|$6.15\pm 0.19$|$3.46\pm 0.26$|$5.48\pm 0.45$|$5.17 \pm 0.94$|$11.86\pm 2.71$| $3.72\pm 0.52$|
-  | IDAAC |$6.03 \pm 0.14$|$3.14 \pm 0.12$|$4.72 \pm 0.42$|$5.30 \pm 1.19 $|$10.23\pm 1.27$| $4.83\pm0.67$|
-  | UCB-DrAC*|$5.65\pm 0.82$|$1.47\pm 0.83$|$4.38\pm 1.07$|$3.97 \pm 1.77$|$8.26\pm 1.95$|$4.59\pm0.53$|
-  | MetaDiffuser* |$5.42\pm 0.09$|$2.47\pm 0.32$|$3.62\pm 0.31$|$4.26 \pm 0.52$|$7.63\pm 1.72$| $3.17\pm0.64$|
-  | DARC |$5.51 \pm 0.24$|$2.16 \pm 0.58$|$3.82 \pm 1.04$|$4.91 \pm 0.37$|$10.39 \pm 1.04$|$4.17\pm1.06$|
-  | M2TD3 |$5.13 \pm 0.32$|$1.35 \pm 0.06$|$4.31 \pm 0.73$|$2.7 \pm 0.63$|$7.17\pm 2.12$| $3.59\pm1.14$|
-  - 我们发现，即使用低质量的数据（一半用随机数据）act比我们比较的原始baseline效果更好，且在短步设定上和我们的方法效果持平。但随着步长的增加和数据质量的降低，效果逐步降低。
-- ACT启发我们使用transformer架构（文章使用了类似bert的训练方式）来代替mlp构建c-vae能够进一步提升MARS的表征能力。
-  - 我们为此做了一组实验。我们发现transformer-based c-vae 对我们的模型有一定提升，并在间隔时间变长后产生了更加明显的表征能力增幅。我们会在未来工作中进一步对其深入探究。
-  Table 1. Scores (Average of 5 runs, ‘*’ represents a newly added method):
-  | Method      | Ninja | Chaser | Heist |Leaper | Miner | Dodgeball|
-  | :-----------: | :-----------: | :------------: | :-----------: |:-----------: | :------------: | :-----------: |
-  | **Ours** |$6.18\pm 0.11$|$3.27\pm 0.08$|$5.65 \pm 0.53$|$5.21 \pm 1.03$|$11.47 \pm 2.97$|$4.80 \pm 0.41$|
-  | ExpGen-IDAAC*|$6.15\pm 0.19$|$3.46\pm 0.26$|$5.48\pm 0.45$|$5.17 \pm 0.94$|$11.86\pm 2.71$| $3.72\pm 0.52$|
-  | IDAAC |$6.03 \pm 0.14$|$3.14 \pm 0.12$|$4.72 \pm 0.42$|$5.30 \pm 1.19 $|$10.23\pm 1.27$| $4.83\pm0.67$|
-  | UCB-DrAC*|$5.65\pm 0.82$|$1.47\pm 0.83$|$4.38\pm 1.07$|$3.97 \pm 1.77$|$8.26\pm 1.95$|$4.59\pm0.53$|
-  | MetaDiffuser* |$5.42\pm 0.09$|$2.47\pm 0.32$|$3.62\pm 0.31$|$4.26 \pm 0.52$|$7.63\pm 1.72$| $3.17\pm0.64$|
-  | DARC |$5.51 \pm 0.24$|$2.16 \pm 0.58$|$3.82 \pm 1.04$|$4.91 \pm 0.37$|$10.39 \pm 1.04$|$4.17\pm1.06$|
-  | M2TD3 |$5.13 \pm 0.32$|$1.35 \pm 0.06$|$4.31 \pm 0.73$|$2.7 \pm 0.63$|$7.17\pm 2.12$| $3.59\pm1.14$|
+  Table 2. Performance (Average of 4 runs):
+  | Method      | $c=4$ | $c=8$ | $c=12$ |$c=16$ | $c=20$ |
+  | :-----------: | :-----------: | :------------: | :-----------: |:-----------: |:-----------: |
+  |Transformer based |$5281.771\pm 231.59$|$5417.26\pm 193.18$|$5513.47\pm 337.52$|$5604.31\pm 246.52$|$5337\pm 114.23$|
+  | MLP based|$5309\pm 143.85$|$5283\pm 171.46$|$5309\pm 143.85$|$5194\pm 201.52$|$4758\pm 106.73$|
 **Q2: All the experiments in Figure 4 are conducted in the same time interval. How does the performance difference change over time interval?**
 
-感谢您从实验角度提出我们可以进一步完善的事情，我们在新版本增加了网格式遍历的不同时间间隔的实验，并将6个mujoco场景的结果进行了记录。
+Thanks for your valuable advice. In the appendix of the new version, we tested MARS with varying interval step $c$ in the Walker2d environment. The other environmental parameters and network hyperparameters remained consistent with the main experiment.
 
-  Table 1. Scores (Average of 5 runs, ‘*’ represents a newly added method):
-  | Method      | Ninja | Chaser | Heist |Leaper | Miner | Dodgeball|
-  | :-----------: | :-----------: | :------------: | :-----------: |:-----------: | :------------: | :-----------: |
-  | **Ours** |$6.18\pm 0.11$|$3.27\pm 0.08$|$5.65 \pm 0.53$|$5.21 \pm 1.03$|$11.47 \pm 2.97$|$4.80 \pm 0.41$|
-  | ExpGen-IDAAC*|$6.15\pm 0.19$|$3.46\pm 0.26$|$5.48\pm 0.45$|$5.17 \pm 0.94$|$11.86\pm 2.71$| $3.72\pm 0.52$|
-  | IDAAC |$6.03 \pm 0.14$|$3.14 \pm 0.12$|$4.72 \pm 0.42$|$5.30 \pm 1.19 $|$10.23\pm 1.27$| $4.83\pm0.67$|
-  | UCB-DrAC*|$5.65\pm 0.82$|$1.47\pm 0.83$|$4.38\pm 1.07$|$3.97 \pm 1.77$|$8.26\pm 1.95$|$4.59\pm0.53$|
-  | MetaDiffuser* |$5.42\pm 0.09$|$2.47\pm 0.32$|$3.62\pm 0.31$|$4.26 \pm 0.52$|$7.63\pm 1.72$| $3.17\pm0.64$|
-  | DARC |$5.51 \pm 0.24$|$2.16 \pm 0.58$|$3.82 \pm 1.04$|$4.91 \pm 0.37$|$10.39 \pm 1.04$|$4.17\pm1.06$|
-  | M2TD3 |$5.13 \pm 0.32$|$1.35 \pm 0.06$|$4.31 \pm 0.73$|$2.7 \pm 0.63$|$7.17\pm 2.12$| $3.59\pm1.14$|
-实验表明，我们的方法可以在大多数现实交互间隔设定下产生较好的效果，但随着时间步的增加，例如不常见的极端长间隔场景，我们的方法性能也出现下降趋势。未来我们会尝试更换更强大的表征模型来提升方法性能，例如更换为ACT样式的transformer架构。
+Table 3. Performance (Average of 4 runs):
+| Method      | $c=4$|$c=8$|$c=12$|$c=16$|$c=20$|$c=24$|
+| :-----------: | :-----------: |:-----------: |:-----------: |:-----------: |:-----------: |:-----------: |
+| MARS|$5309\pm 143.85$|$5283\pm 171.46$|$5309\pm 143.85$|$5194\pm 201.52$|$4758\pm 106.73$|$4514\pm 377.25$|
 
-**Q3: Line 181: What's the upper limit of action change?.** 
+The Above results reveal a diminishing performance of MARS as the decision step size increases beyond $c=20$. We attribute this trend to the limitations in representation capacity imposed by the MLP architecture in the VAE. In the future, we plan to investigate alternative effective networks like Transformers to enhance the construction capabilities of MARS within action spaces under very long interval step setting.
 
-我们会在新版本对这一块详细阐述。动作上限$B$根据每个任务而异。其语义是动作所能改变的最大尺度，例如mujoco中的动作范围是【-1,1] 则$B=1- -1=2$.
+**Q3: Line 181: What's the upper limit of action change?** 
+
+We covered this in detail in the new version. The upper action limit $B$ varies according to each task. The semantics is the maximum scale that an action can change. For example, The range of actions in mujoco is $[-1,1]$, then $B=1- (-1)$
 
 **Q4:Eq 3 defines how the action transition scale is computed, but in Figure 3, why does the policy need to output the action transition scale?.** 
 
-您问的问题非常细致，我会在新版本中进行强调。是的正如您所见，我们首先定义了如何计算ats，并将其作为一个自适应改变的条件项来进一步提升解码器的生成。而这一解码器也在第二阶段用于解码强化学习策略选择的隐空间动作，即看作一个保险，来纠正策略的明显失误决策，条件项可以将隐变量约束在一个小子空间内来纠正策略的明显失误决策，这在大多数实时控制场景是需要的，例如极速避障场景需要动作序列变化尺度大，而机器人运动则相反。但想要完成有效的解码除了输入隐动作，还需要输入期望动作尺度转换作为条件项。为了实现自适应的动作尺度转移的选择(然而，若是针对每个场景或一段状态都用人工来提供ats是低效且高成本的)，为此，我们利用强化学习的自适应决策能力，令其在决策隐空间动作的同时分出一个决策头来选择ats（您可以将这一数值类比为和隐动作z一样的一种隐空间，只不过它不是通过深度表征模型学习出来的，而是通过我们提供的计算公式构建的）.这一设计结构在【hybrid action】领域得到了广泛有效性验证。且在我们的实验中也得到了有效性验证。
-我们在新版本中增加了对这一模块的消融实验来证明将ats的选择交给强化学习策略是可行的。
+This is an in-depth problem, and we emphasize it in the new version. In the second stage, the decoder is employed to decode the latent action selected by the policy, with the action transition scale (ATS) functioning as a condition term that dynamically adjusts to guide the decoder's generation process. This condition term helps constrain the latent variable within a smaller subspace to rectify any erroneous decisions made by the policy. Hence, ATS can be regarded as another decision space akin to the action latent space $z$. However, the ATS is not constructed through deep learning but according to our formulated approach in Sec. 3.1. To enable adaptive selection of ATS, which would be inefficient and costly to manually provide for each scene or state, we leverage the adaptive decision-making capability of RL. This allows the system to decide on actions within the latent space and allocate a separate decision head to select a number from ATS.
 
-基线方法是在其他模块不变的前提下使用先验人工脚本提供合适的ats（TD3+ MARS）。实验表明，强化学习策略在一定时间步的探索后可以找到合适的ats并达到良好的表现。
-Table 1. Performance (Average of 5 runs):
-| Method      | Ninja | Chaser | Heist |
-| :-----------: | :-----------: | :------------: | :-----------: |
-| Ours |$6.16\pm 0.11$|$3.27\pm 0.08$|$3.27\pm 0.08$|
-| KNN |$5.22\pm 0.43$|$2.86\pm 0.31$|$2.71\pm 0.25$|
+This output structure has been extensively validated in the area of hybrid action space control [1][2]. In the new version, we have included ablation experiments on Ant-v2 for this module to demonstrate the viability of entrusting the selection of ATS to the RL policy.
+
+The baseline method involves selecting appropriate ATS through pre-defined manual scripts without altering other modules. Results indicate that the RL policy can identify the suitable ATS and achieve commendable performance after a certain exploration step.
+
+Table 4. Performance (Average of 3 runs):
+| Method      |  training step = 50k|training step = 1m|training step = 2m|
+| :-----------: | :-----------: | :-----------: | :-----------: | 
+| Ours |$1962\pm 421.42$|$3243\pm 109.25$|$4183\pm 171.46$|
+| Baseline |$2213\pm 311.97$|$3126\pm 128.36$|$4207\pm 136.61$|
 
 **Q5: Line 245: It's confusing to say "choosing optimal z" since you just sample z from a policy.** 
 
-感谢您细致入微地指出我们不严谨的表述，我们原本的意思是想说选择合适的动作。在新版本中将optimal去掉
+Thanks for pointing out our imprecise presentation. In the new version, "optimal" is removed.
 
-**Q6: You denote the reconstruction layer as $g_\phi_1$. What does "1" in the subscript mean? This is confusing since you use subscript to denote timestep as well. Similarly, what's the purpose "2" of $h_\phi_2$?** 
+**Q6: You denote the reconstruction layer as $g_{\phi_1}$. What does "1" in the subscript mean? This is confusing since you use subscript to denote timestep as well. Similarly, what's the purpose "2" of $h_{\phi_2}$?** 
 
-我为我们的表述造成的迷惑向您道歉。我们的本意是使用数字i={1,2}来代表解码器之后连接的第i个并行输出头（ reconstruction layer）。新版本会去掉冗余符号。
+We apologize for any confusion caused by our presentation. We intend to use the number $i=\{1,2\}$ to represent the $i_{th}$ parallel output head (reconstruction layer) connected after the decoder. Redundant symbols are removed in the new edition.
 ### Weakness
 **W1: Section 4 is unnecessarily long and consists of a lot of redundant text.** 
 
-感谢您从文章结构角度给出的宝贵意见，在新版本中我们凝练了第四章的文字，使其更加简洁直观。
+ In the latest version, we streamlined the content of Section 4 to enhance its conciseness and clarity.
 
