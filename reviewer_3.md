@@ -1,12 +1,11 @@
-We are immensely grateful to you for recognizing the importance and value of our approach. Your valuable suggestions inspire us to improve our work further. Based on your feedback, we analyzed the difference between our setting (intermittent MDP) and Delayed-MDP through a demo example and detailed explanation in the revised version. Additionally, we compared our method with several SOTA delayed MDP methods on multiple complex scenarios in the main experiment section. (6 more simulation tasks and 1 more real-world grasping task than the original version). 
+We are immensely grateful to you for recognizing the importance and value of our research. Your suggestions inspire us to improve our work further. Based on your feedback, we analyzed the difference between our setting (intermittent MDP) and Delayed-MDP through a demo example and detailed explanation in the revised version. Additionally, we compared our method with several SOTA delayed MDP methods on multiple complex scenarios in the main experiment section. (4 more robotic motion control tasks and 2 more manipulation tasks). 
 
 If you think the following response addresses your concerns, we would appreciate it if you could kindly consider raising the score.
 ### Questions
-**Q1: Compare Intermitted MDP and Delayed MDP: Why define intermitten MDP separately while delayed MDP is widely adopted in the community?**
+**Q1: Compare Intermitted MDP and Delayed MDP: Why define intermittent MDP separately while delayed MDP is widely adopted in the community?**
 
-Thanks for your in-depth question. Both the Intermittent MDP and the traditional Delayed MDP models aim to represent non-ideal (unstable) environments. However, these two approaches differ significantly in follow aspects：
-- *Applicable scenarios* 延迟MDP主要关注网络高延迟导致的信息异步传输场景[1]。Intermittent MDP 关注的是信息传输瞬发（延迟不明显，且可以通过常用通信层面技术[2]进行有效缓解)但执行端和决策端之间交互信道会出现随机/有规律阻断的场景[3][4], 即信息直接丢失(无法用于策略训练). 这类场景主要存在于游戏NPC控制和交互高成本的机器人控制任务。
-- *Trainging Data* 大多数延迟MDP默认所有数据最终都会到达，但获取方面存在时间上的异步,且每一个(s,a)对应的奖励是单独可获得的[5]（密集奖励）, 因此，这类设定的方法允许训练期间使用完整数据转移。然而, Intermittent MDP 将未及时传输的信息直接视为丢失(无法用于策略训练)，且奖励的反馈是一段动作序列的奖励总和（稀疏奖励，只能看到最后一个动作执行后的奖励，更符合现实）。
+Thanks for your in-depth question, we describe our setting more clearly in the new version. Both the Intermittent MDP and the traditional Delayed MDP models aim to represent non-ideal (unstable) environments. However, the tasks differences that both focus on also make the following distinction：
+- *Training Data:* Delayed MDP focuses on scenarios where information is transmitted asynchronously (yet not lost) because of high network latency. In this context, **the agent has access to complete data during training but cannot utilize the most recent data when making decisions**[1]. Intermittent MDP addresses situations where messages are transmitted instantaneously (with negligible delays that can be efficiently managed using standard communication layer techniques [2]). However, the communication channel between the executor and the decision-making side may be sporadically or systematically obstructed [3], resulting in information that fails to arrive being considered a direct loss. **Consequently, the agent can only utilize incomplete data during both training and decision-making processes.** 
   - 我们在两个mujoco场景上观测了当无法在训练阶段使用密集状态转移时延迟MDP方法是否可以完成Intermitted MDP 任务。
   
   Table 1. Performance (Average of 5 runs):
@@ -17,7 +16,8 @@ Thanks for your in-depth question. Both the Intermittent MDP and the traditional
   | DBSCAN  |$5.79\pm 0.26$|$2.53\pm 0.28$|$3.04\pm 0.11$|
   | DPC  |$4.82\pm 0.51$|$2.61\pm 0.41$|$3.10\pm 0.14$|
 
-  - 我们在两个mujoco场景上观测了当无法获得密集奖励时延迟MDP方法是否可以完成Intermitted MDP 任务。
+- *Reward feedback:* Mostly, in delayed MDP, the reward associated with each state-action pair can be acquired independently (**dense reward**)[5]. However, Intermittent MDP regards reward feedback as the cumulative rewards of a sequence of actions (**sparse reward**), a depiction that aligns more realistically with scenarios in practice. 
+  - We compare the performance of the delayed MDP methods with our method on Ant-v2 when dense rewards are not available. The results show that our method is more effective in dealing with fuzzy reward feedback.
   
   Table 1. Performance (Average of 5 runs):
   | Method      | Ninja | Chaser | Heist |
@@ -27,8 +27,8 @@ Thanks for your in-depth question. Both the Intermittent MDP and the traditional
   | DBSCAN  |$5.79\pm 0.26$|$2.53\pm 0.28$|$3.04\pm 0.11$|
   | DPC  |$4.82\pm 0.51$|$2.61\pm 0.41$|$3.10\pm 0.14$|
 
-- *Motion mode requirements* 延迟MDP关注执行者运动的准确性，对运动的连贯性和时间效率没有严格要求。Intermitted MDP需要在确保任务完成的前提下还要求运动的平滑性和时间性能,即要求执行端一直保持运动（参考论文图1），这也是为什么我们在真机实验中设置了两个分别用来评估时间性能和运动平滑性的指标。
-  - 我们使用gym中的简单的迷宫导航任务(2dmaze)作为实例，对比了Intermitted MDP 方法和 delayed MDP 方法在运动平滑性和时间性能上的差异。
+- *Motion mode requirements (described in Fig.1)* The real-world tasks that Intermittent MDP targets typically always involve high-frequency operational demands, e.g. game NPC control and robot control[4]. Consequently, **Intermittent MDP expects the action to be executed at every time step to guarantee the smoothness and stability motion. In contrast, delayed MDP does not incorporate this constraint and permits certain time steps to be non-excution points.** For instance, in a scenario where a robot needs to continue walking despite a blocked interaction channel, it cannot afford to wait for the next state to be successfully transmitted before taking action. Delaying the decision in such cases could result in the movement abruptly halting within a specific timeframe, leading to a loss of balance and a potential fall. So the focus is not solely on the efficiency of discretely executing actions. Rather, the emphasis lies on ensuring that each action smoothly transitions with its neighboring actions while maintaining validity. 
+  - We compared the motion smoothness and temporal performance between our method and delayed MDP methods in the Humanoid scenario. Humanoid demands exceptionally high motion balance and necessitates smooth fine-tuning at each time step to maintain balance effectively.  The results show that our method can make the movement of the executive side smoother and more stable.
 
   Table 1. Performance (Average of 5 runs):
   | Method      | Ninja | Chaser | Heist |
@@ -38,8 +38,8 @@ Thanks for your in-depth question. Both the Intermittent MDP and the traditional
   | DBSCAN  |$5.79\pm 0.26$|$2.53\pm 0.28$|$3.04\pm 0.11$|
   | DPC  |$4.82\pm 0.51$|$2.61\pm 0.41$|$3.10\pm 0.14$|
 
-- *The information used for decisions* 延迟MDP方法大多允许访问每次延迟的时间甚至是中间状态来加强决策。而我们对这一方面更加严格，仅能根据当前已有状态实现超前决策。
-  - 我们在两个mujoco场景比较了去掉延迟MDP方法中使用的辅助信息后，在Intermitted MDP场景上的效果。
+- *The information used for decisions* Delayed MDP methods typically involve accessing prior information, such as the time to be delayed or even intermediate states, to enhance decision-making. Our constraint is more stringent, where the agent is only permitted to make advanced decisions based on the current state.
+  - We compare the effect of the delayed MDP method without auxiliary information and our method, on the Intermitted control task. The results show that our method is somewhat more robust to sparse information.
     
   Table 1. Performance (Average of 5 runs):
   | Method      | Ninja | Chaser | Heist |
@@ -49,8 +49,8 @@ Thanks for your in-depth question. Both the Intermittent MDP and the traditional
   | DBSCAN  |$5.79\pm 0.26$|$2.53\pm 0.28$|$3.04\pm 0.11$|
   | DPC  |$4.82\pm 0.51$|$2.61\pm 0.41$|$3.10\pm 0.14$|
 
-- *Decision step number* 很多延迟MDP设定对多步决策没有刚性需求（不需要执行端保持持续性运动）[][]都只需要对未来进行单步决策，最近的DCAC可以实现短时间多步决策. 引用："ddd" 而intermittted MDP需要确保执行端能够在较长交互间隔中保持运动，因此决策步数更长。
-  - 我们在两个mujoco场景上测试了两种MDP对应的方法处理多时间步决策时的效果。
+- *Decision step number per step* The delay scenario addressed by delayed MDP involves brief durations of delay (statistics from [3] indicate that the majority of delays are less than one second), making the future decision action length relatively short in this context. In contrast, our setup necessitates accounting for instances where the communication channel may remain non-functional for an extended time due to channel breakdowns. Therefore, Intermittent MDP method must consider longer durations (in real scenarios, there could be intervals exceeding 5 seconds [4]) in our deliberations, i.e. Deciding on a lengthy action sequence in a single step.
+  - We tested the ability upper bound of single-step decision action sequence length for the corresponding methods of the two MDPS on the Ant-v2 scenario. The results show that our method performs better in the long decision sequence setting.
   Table 1. Performance (Average of 5 runs):
   | Method      | Ninja | Chaser | Heist |
   | :-----------: | :-----------: | :------------: | :-----------: |
@@ -58,9 +58,6 @@ Thanks for your in-depth question. Both the Intermittent MDP and the traditional
   | K-means  |$5.22\pm 0.43$|$2.86\pm 0.31$|$2.71\pm 0.25$|
   | DBSCAN  |$5.79\pm 0.26$|$2.53\pm 0.28$|$3.04\pm 0.11$|
   | DPC  |$4.82\pm 0.51$|$2.61\pm 0.41$|$3.10\pm 0.14$|
-
-
-In summary, 两种 MDP分别关注了实时控制领域中的不同问题和场景，且在多个角度是有较大区别的。
 
 **Q2: How does the method compare to existing delay MDP methods.**
 
