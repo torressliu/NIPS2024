@@ -6,7 +6,7 @@ If you think the following response addresses your concerns, we would appreciate
 
 Thanks for your in-depth question, we describe our setting more clearly in the new version. Both the Intermittent MDP and the traditional Delayed MDP models aim to represent non-ideal (unstable) environments. However, the tasks differences that both focus on also make the following distinction：
 - *Training Data:* Delayed MDP focuses on scenarios where information is transmitted asynchronously (yet not lost) because of high network latency. In this context, **the agent has access to complete data during training but cannot utilize the most recent data when making decisions**[1]. Intermittent MDP addresses situations where messages are transmitted instantaneously (with negligible delays that can be efficiently managed using standard communication layer techniques [2]). However, the communication channel between the executor and the decision-making side may be sporadically or systematically obstructed [3], resulting in information that fails to arrive being considered a direct loss. **Consequently, the agent can only utilize incomplete data during both training and decision-making processes.** 
-  - 我们在两个mujoco场景上观测了当无法在训练阶段使用密集状态转移时延迟MDP方法是否可以完成Intermitted MDP 任务。
+  - We compare the delayed MDP method trained on incomplete transfer data with our method on Ant-v2 and find that our method performs somewhat better.
   
   Table 1. Performance (Average of 5 runs):
   | Method      | Ninja | Chaser | Heist |
@@ -19,7 +19,7 @@ Thanks for your in-depth question, we describe our setting more clearly in the n
 - *Reward feedback:* Mostly, in delayed MDP, the reward associated with each state-action pair can be acquired independently (**dense reward**)[5]. However, Intermittent MDP regards reward feedback as the cumulative rewards of a sequence of actions (**sparse reward**), a depiction that aligns more realistically with scenarios in practice. 
   - We compare the performance of the delayed MDP methods with our method on Ant-v2 when dense rewards are not available. The results show that our method is more effective in dealing with fuzzy reward feedback.
   
-  Table 1. Performance (Average of 5 runs):
+  Table 2. Performance (Average of 5 runs):
   | Method      | Ninja | Chaser | Heist |
   | :-----------: | :-----------: | :------------: | :-----------: |
   | Ours |$6.16\pm 0.11$|$3.27\pm 0.08$|$3.27\pm 0.08$|
@@ -30,7 +30,7 @@ Thanks for your in-depth question, we describe our setting more clearly in the n
 - *Motion mode requirements (described in Fig.1)* The real-world tasks that Intermittent MDP targets typically always involve high-frequency operational demands, e.g. game NPC control and robot control[4]. Consequently, **Intermittent MDP expects the action to be executed at every time step to guarantee the smoothness and stability motion. In contrast, delayed MDP does not incorporate this constraint and permits certain time steps to be non-excution points.** For instance, in a scenario where a robot needs to continue walking despite a blocked interaction channel, it cannot afford to wait for the next state to be successfully transmitted before taking action. Delaying the decision in such cases could result in the movement abruptly halting within a specific timeframe, leading to a loss of balance and a potential fall. So the focus is not solely on the efficiency of discretely executing actions. Rather, the emphasis lies on ensuring that each action smoothly transitions with its neighboring actions while maintaining validity. 
   - We compared the motion smoothness and temporal performance between our method and delayed MDP methods in the Humanoid scenario. Humanoid demands exceptionally high motion balance and necessitates smooth fine-tuning at each time step to maintain balance effectively.  The results show that our method can make the movement of the executive side smoother and more stable.
 
-  Table 1. Performance (Average of 5 runs):
+  Table 3. Performance (Average of 5 runs):
   | Method      | Ninja | Chaser | Heist |
   | :-----------: | :-----------: | :------------: | :-----------: |
   | Ours |$6.16\pm 0.11$|$3.27\pm 0.08$|$3.27\pm 0.08$|
@@ -41,7 +41,7 @@ Thanks for your in-depth question, we describe our setting more clearly in the n
 - *The information used for decisions* Delayed MDP methods typically involve accessing prior information, such as the time to be delayed or even intermediate states, to enhance decision-making. Our constraint is more stringent, where the agent is only permitted to make advanced decisions based on the current state.
   - We compare the effect of the delayed MDP method without auxiliary information and our method, on the Intermitted control task. The results show that our method is somewhat more robust to sparse information.
     
-  Table 1. Performance (Average of 5 runs):
+  Table 4. Performance (Average of 5 runs):
   | Method      | Ninja | Chaser | Heist |
   | :-----------: | :-----------: | :------------: | :-----------: |
   | Ours |$6.16\pm 0.11$|$3.27\pm 0.08$|$3.27\pm 0.08$|
@@ -51,7 +51,7 @@ Thanks for your in-depth question, we describe our setting more clearly in the n
 
 - *Decision step number per step* The delay scenario addressed by delayed MDP involves brief durations of delay (statistics from [3] indicate that the majority of delays are less than one second), making the future decision action length relatively short in this context. In contrast, our setup necessitates accounting for instances where the communication channel may remain non-functional for an extended time due to channel breakdowns. Therefore, Intermittent MDP method must consider longer durations (in real scenarios, there could be intervals exceeding 5 seconds [4]) in our deliberations, i.e. Deciding on a lengthy action sequence in a single step.
   - We tested the ability upper bound of single-step decision action sequence length for the corresponding methods of the two MDPS on the Ant-v2 scenario. The results show that our method performs better in the long decision sequence setting.
-  Table 1. Performance (Average of 5 runs):
+  Table 5. Performance (Average of 5 runs):
   | Method      | Ninja | Chaser | Heist |
   | :-----------: | :-----------: | :------------: | :-----------: |
   | Ours |$6.16\pm 0.11$|$3.27\pm 0.08$|$3.27\pm 0.08$|
@@ -61,43 +61,53 @@ Thanks for your in-depth question, we describe our setting more clearly in the n
 
 **Q2: How does the method compare to existing delay MDP methods.**
 
-感谢您的提问，我们在新版本中增加了我们的方法与主流 延迟MDP方法的比较。
-Baslines: 我们选择了delayed mdp经典方法 DCAC RTAC， 2020年的经典工作EMQL以及24年最新的DOMDP方法[Reinforcement Learning from Delayed Observations via World Models]和一个最新的基于模型的方法MB state delayed RL。
+Thanks for your suggestion. we add a comparison of our method with mainstream deferred MDP methods on multiple complex tasks from the perspective of multiple metrics in the new version.
 
-Benchmarks: 为了进一步验证我们方法的有效性，我们在四个mujoco基础上增加了四个DMC机器人控制任务和两个metaword中的机械臂抓取任务.
+*Baselines:* We select the latest multi-step decision-making fully supervised method ACT [1] from the robotics learning area, which requires us to build an expert dataset for it via ppo in advance; and two recent SOTA methods in the Delayed MDP domain, i.e. DCAC [2] and State Augmentation (SA) [3] (Relax the Intermitted setting restrictions, allow such methods to additionally use dense rewards and delay priors at each step, and set the delay coefficient to the interaction interval). For a more comprehensive analysis, a recent model-based approach,i.e. delayed Dreamer[4], to overcome state delay is also chosen. 
 
-Setting: 交互间隔设置与我们文章主实验保持一致，即最大交互间隔为8.
+*Benchmarks:* For simulation environments, we further select four more challenging DeepMind Control (DMC) tasks focused on bionic robot locomotion: Dog Run, Dog Trot, Dog Stand and Humanoid Walk. DMC tasks demand coordinated movement from multi-joint bionic robots. Besides, two robotic arm control tasks in MetaWorld: Sweep Into and Coffee Push are used. For the real-world task, we condense the target arrangement (reducing the operational space to 85% of the original size), that is, the manipulator is required to work more smoothly and stably. The invalid jitter is more likely to knock over the target to be operated, resulting in task failure. The environmental parameters and network hyperparameters remained consistent with the main experiment.
 
-Table 1. Performance (Average of 5 runs):
-| Method      | Ninja | Chaser | Heist |
-| :-----------: | :-----------: | :------------: | :-----------: |
-| Ours |$6.16\pm 0.11$|$3.27\pm 0.08$|$3.27\pm 0.08$|
-| K-means  |$5.22\pm 0.43$|$2.86\pm 0.31$|$2.71\pm 0.25$|
-| DBSCAN  |$5.79\pm 0.26$|$2.53\pm 0.28$|$3.04\pm 0.11$|
-| DPC  |$4.82\pm 0.51$|$2.61\pm 0.41$|$3.10\pm 0.14$|
+*Metrics:* We evaluate methods in terms of performance and Smoothness (whether the motion is coherent and stable, invalid jitter and stagnation will reduce the score, please refer to Sec.4.2 for detail).
 
-进一步，我们比较了当间隔时间步增加后，各方法的有效性（长时间步提前决策能力）。我们的方法有明显的优势。
+Table 6. Performance in newly added difficult tasks (smoothness (%)) (Average of 4 runs):
+| Method      |Dog Run|Dog Trot| Dog Stand| Humanoid Walk|Sweep Into|Coffee Push|
+| :-----------: | :-----------: | :------------: | :-----------: | :-----------: | :-----------: | :-----------: |
+| **Ours**|$124.61\pm 44.92 (75)$|$574.12\pm 28.76 (88)$|$614.03\pm 17.42 (73)$|$105.47\pm 35.83 (82)$|$0.51\pm 0.13 (68)$|$0.38\pm 0.06(63)$|
+| DCAC|$96.87\pm 28.44 (53)$|$426.93\pm 50.48 (72)$|$562.64\pm 22.73 (64)$|$105.32\pm 29.16 (49)$|$0.44\pm 0.27 (41)$|$0.19\pm 0.13 (48)$|
+| SA |$92.74\pm 51.06 (37)$|$385.67\pm 52.49 (39)$|$503.94\pm 14.86 (27)$|$75.66\pm 31.42 (45)$|$0.52\pm 0.21 (37)$|$0.34\pm 0.09 (39)$|
+| delayed Dreamer |$95.31\pm 26.74 (46)$|$428.39\pm 46.23 (46)$|$526.07\pm 21.84 (25)$|$89.25\pm 27.41 (41)$|$0.56\pm 0.17 (32)$|$0.39\pm 0.04 (37)$|
 
-Table 1. Performance (Average of 5 runs):
-| Method      | Ninja | Chaser | Heist |
-| :-----------: | :-----------: | :------------: | :-----------: |
-| Ours |$6.16\pm 0.11$|$3.27\pm 0.08$|$3.27\pm 0.08$|
-| K-means  |$5.22\pm 0.43$|$2.86\pm 0.31$|$2.71\pm 0.25$|
-| DBSCAN  |$5.79\pm 0.26$|$2.53\pm 0.28$|$3.04\pm 0.11$|
-| DPC  |$4.82\pm 0.51$|$2.61\pm 0.41$|$3.10\pm 0.14$|
+Table 7. Performance in old tasks (smoothness (%)) (Average of 4 runs):
+| Method  |Ant-v2|Walker2d-v2| HalfCHeetah-v2| Hopper-v2|
+| :-----------: | :-----------: | :------------: | :-----------: | :-----------: | 
+| **Ours**|$4354.61\pm 158.44$|$5436.42\pm 217.83$|$6175.63\pm 273.95$|$2613.58\pm 177.96$|
+| DCAC |$3279.82\pm 127.83$|$4892.18\pm 383.07$|$5811.51\pm 108.33$|$2684 .31\pm 238.27$|
+| SA |$492.53\pm 31.95$|$2584.18\pm 106.24$|$3281.45\pm 139.42$|$381.74\pm 53.67$|
+| delayed Dreamer|$408.25\pm 31.76$|$529.26\pm 68.21$|$112.73\pm 17.82$|$1173.93\pm 78.28$|
 
-**Weakness: The method is straightforward and easy to think of.**
+Table 6,7 shows that our method performs better than Delayed MDP methods in almost all intermitted MDP control tasks while ensuring smooth and coherent motion of the agent. 
 
-我们在新版本中增加了对我们工作新颖性的突出段落，这个工作的宏观架构确实较为直接 (本质上是一个CVAE)，因此从应用的角度更加便捷、插件化。但在实验初期我们发现原始的CVAE无法有效构建语义平滑的隐空间从而限制了强化学习算法的优化。为此，我们方法的创新点主要是思考如何通过设计更好的辅助技术来提升原始vae的隐空间构建能力.
-因为随着动作时间步的增加（纬度增加）vae的表征效果也受到影响。且原始的vae无法构建动作语音平滑的空间从而降低强化学习探索和利用的效果。
-为此我们1）为vae引入了atc来自适应约束动作解码在有效区间从而确保策略的有效性（Sec3.1），2）我们引入状态残差模块，引导隐空间中对环境影响相似的点距离相近（Sec3.2）来进一步提升模型效果。
+P.S. If you have other delayed MDP methods that you would like us to compare but are not in the scope of our investigation, please let us know and we would be happy to include them in our experimental analysis.
+### Weaknesses
+**W1: The method is straightforward and easy to think of.**
 
-模块有效性验证实验：我们选择了四个mujoco场景对我们方法中的两个关键模块进行验证，结果表明，加了两个模块后,强化学习的优化更加快捷、稳定。且在长时许场景效果比原始vae效果更好。
+We add a description of the novelty of our work. The Backbone of MARS is indeed clear, essentially resembling a CVAE, thereby enhancing convenience and plug-and-play capabilities from an application standpoint. However, at the methodological level, we discovered that original CVAE could not effectively construct the semantic smooth latent space and the representation realization of long action sequences was poor, thereby constraining the optimization of the RL algorithm. Therefore, the primary innovation of our method revolves around enhancing the capability of constructing the latent space of the original VAE through the development of more effective auxiliary techniques.
 
-Table 1. Performance (Average of 5 runs):
-| Method      | Ninja | Chaser | Heist |
-| :-----------: | :-----------: | :------------: | :-----------: |
-| Ours |$6.16\pm 0.11$|$3.27\pm 0.08$|$3.27\pm 0.08$|
-| K-means  |$5.22\pm 0.43$|$2.86\pm 0.31$|$2.71\pm 0.25$|
-| DBSCAN  |$5.79\pm 0.26$|$2.53\pm 0.28$|$3.04\pm 0.11$|
-| DPC  |$4.82\pm 0.51$|$2.61\pm 0.41$|$3.10\pm 0.14$|
+In particular, we introduce two innovative techniques for the original VAE: 1) the introduction of ATC to dynamically restrict action decoding within an effective interval to ensure policy effectiveness (Sec 3.1), and 2) the incorporation of a state residual module to encourage points in the latent space with similar environmental impacts to be closer to each other (Sec 3.2), enhancing the overall model performance.
+
+Module validation experiments are conducted on four Mujoco tasks to assess the efficacy of the two key modules. The results in Tabel 8 indicate that RL optimization is quicker and more stable with the inclusion of these modules. Additionally, results in Table 9 shows that the performance of MARS surpasses that of the original VAE in long sequence decision scenarios.
+
+
+Table 8. Performance (smoothness (%)) (Average of 4 runs):
+| Method  |Ant-v2|Walker2d-v2| HalfCHeetah-v2| Hopper-v2|
+| :-----------: | :-----------: | :------------: | :-----------: | :-----------: | 
+| VAE + ATS + SR (MARS) |$4354.61\pm 158.44$|$5436.42\pm 217.83$|$6175.63\pm 273.95$|$2613.58\pm 177.96$|
+| VAE + SR |$3279.82\pm 127.83$|$4892.18\pm 383.07$|$5811.51\pm 108.33$|$2684 .31\pm 238.27$|
+| VAE + ATS |$492.53\pm 31.95$|$2584.18\pm 106.24$|$3281.45\pm 139.42$|$381.74\pm 53.67$|
+| vanilla VAE|$408.25\pm 31.76$|$529.26\pm 68.21$|$112.73\pm 17.82$|$1173.93\pm 78.28$|
+
+Table 9. Performance  (Average of 4 runs):
+| Method  |Ant-v2|Walker2d-v2| HalfCHeetah-v2| Hopper-v2|
+| :-----------: | :-----------: | :------------: | :-----------: | :-----------: | 
+| VAE + ATS + SR (MARS) |$4354.61\pm 158.44$|$5436.42\pm 217.83$|$6175.63\pm 273.95$|$2613.58\pm 177.96$|
+| vanilla VAE |$3279.82\pm 127.83$|$4892.18\pm 383.07$|$5811.51\pm 108.33$|$2684 .31\pm 238.27$|
