@@ -1,0 +1,18 @@
+再次感谢您细致入微的回复。使我们更加明确您的意图。我们为使用comment来rebuttal道歉。我们将本该放入到pdf中的信息针对每个审稿人的提问放到各自的comment中了。这是怕审稿人阅读不连贯从而产生困惑。且补的实验较多，rebuttal确实放不下。我们在未来一定会遵守规定，维护投稿秩序，给审稿人和社区提供更好的阅读体验。
+**Q2: If I remember correctly, c is the max time interval of an MDP. What not doing this experiment on the other baselines?**
+
+是的，您说的没错。由于时间紧迫，在rebuttal阶段没能跑完全部实验。在这里我们补充所有方法在不同c设定下的对比。实验显示，我们的方法在较长的时序决策任务上表现更好。
+
+**Q4:Please shorten it.**
+
+在强化学习策略要解码器来将隐动作重构，而在重构时C-VAE的解码器不仅需要输入隐空间动作而且需要输入合适的AST作为条件项来确保解码的动作与当前状态或任务相匹配。
+Thus,to enable adaptive selection of ATS, which would be inefficient and costly to manually provide for each task or state, we leverage the adaptive decision-making capability of RL. 
+This allows the policy to decide on actions within the latent space $z$ and allocate a separate decision head to select a number from ATS.
+
+**Q6: If you're talking about the output head in Figure 3, please consider the other subscript that represents the purpose of the output heads better.**
+是的，我们在新版本中更容易区分的$\h_\theta$ 和 $\g_\mu$来表示两个输出头。
+
+**In the latest version, we streamlined the content of Section 4 to enhance its conciseness and clarity: I need to see your detailed plan of revision; otherwise, I don't think the next version will be concise.**
+- 在4.1Scale-Conditioned Multi-step Action Encoding and Decoding 的164-180行，我们将对 action transition scale 的冗余介绍进行缩短，尤其是大篇幅使用机器人运动作为例子的解释部分（173-178），这是因为在intro部分我们已经进行了相关的解释.
+- 4.3DRL with Multi-step Action Representation 的冗余最多信息较为重复，我们首先将冗杂的训练过程介绍进行缩减（267-277）,因为前两小节已经介绍的较为清晰且有直观的伪代码辅助读者理解。此外，我们将有关MARS在随机间隔上的执行方式（278-285）进行了简化，新版本会直接介绍使用的技术，将冗余的解释移到附录中。便于读者理解。
+通过以上缩减，章节4整体减少了3/4页的空间，这正好允许我们将新增加的主实验加入到正文中。
