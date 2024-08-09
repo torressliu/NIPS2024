@@ -1,4 +1,19 @@
 再次感谢您细致入微的回复。使我们更加明确您的意图。我们为使用comment来rebuttal道歉。我们将本该放入到pdf中的信息针对每个审稿人的提问放到各自的comment中了。这是怕审稿人阅读不连贯从而产生困惑。且补的实验较多，rebuttal确实放不下。我们在未来一定会遵守规定，维护投稿秩序，给审稿人和社区提供更好的阅读体验。
+**Q1.1: From the comparison with ACT and MARS, I don't think you can draw a statistically significant conclusion that MARS is better than ACT since their mean scores are close and standard deviations are overlapped.** 
+感谢您提出的问题。由于资源和时间限制，在第一轮rebuttal中我们的工程团队只使用了3个seed在四个较为简单的场景对MARS和ACT进行了比较（因为原始的ACT和我们关注的领域差异较大，且并不是强化学习方式，而是模仿学习，因此我们需要大量的时间，4天，来熟悉ACT代码寻找合适的方法，最后发现ppo是最好的，用于收集专家数据）。
+这次，我们将seed增加为10个，并额外增加了6个更为复杂的场景（4个DMC场景以及2个metaworld场景）。
+
+**Q1.3: Form of application & Technique: I think you can apply ACT model to RL setting.**
+
+Thanks for your suggestions, our engineering team tried to translate ACT directly into RL setting. 
+We spend a lot of time to construct an effective reward function, and use off-line learning to train ACT, and using experience buffer pool technology to ensure the effectiveness of ACT training.
+
+We compare the performance of ACT, MARS, and Transformer on six complex scenes。
+
+The results show that MARS with the transformer architecture performs the best, which we believe is because transformer enhances the representation ability of VAE to construct the action space. 
+While the ACT effect of direct replacement to RL setting is not as good as the original ACT effect, in the future, we can further study how to introduce other techniques to increase the performance of ACT replacement to reinforcement learning mode
+结果显示，MARS在DOG RUN， Dog Trait, Humanoid RUN, coffee in ,manipulat, Ant-v2六个场景上具有明显优势，而在较为简单的Hopper-v2 HalfCheetah-v2表现与ACT相似。我们认为，除了模型架构和训练方式造成表现差异外，ACT对专家数据的高要求也影响了其在我们对比场景上的表现（这也是online learning的一个优势，即避免了数据收集的高成本，这一优势在复杂的现实场景较为重要）
+
 **Q2: If I remember correctly, c is the max time interval of an MDP. What not doing this experiment on the other baselines?**
 
 是的，您说的没错。由于时间紧迫，在rebuttal阶段没能跑完全部实验。在这里我们补充所有方法在不同c设定下的对比。实验显示，我们的方法在较长的时序决策任务上表现更好。
